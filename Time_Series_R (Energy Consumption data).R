@@ -123,6 +123,77 @@ library(dplyr)
 missed_wind <- tsd[which(is.na(tsd$Wind)), names(tsd)]
 head(missed_wind)
 
+# Lov=cate the NA missing values in a specific year (2011)
+missed_wind_2011 <- is.na(tsd$Wind[which(tsd$year == '2011')])
+# Count the total of missed values 
+sum(missed_wind_2011)
+
+# Find out if a specific row has any missing data in any of the columns 
+missed_in_row <- tsd[which(tsd$Date >"2011-12-12" & tsd$Date <"2011-12-16"), names(tsd)]
+head(missed_in_row)
+
+# Fill the empty cells with values 
+library(tidyr)
+# Forward fill
+missed_in_row %>% fill(Wind)
+
+#------------------------------------Trends
+# Use Rolling means to smooth a time series by averaging out variations at frequencies much higher than the window size
+# and averagind out any seasonality on a time scale equal to the window size 
+
+library(zoo)
+
+SevenDayMean <- tsd %>% 
+  dplyr::arrange(desc(year)) %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(test_07da = zoo::rollmean(Consumption, k = 7, fill = NA))%>%
+  dplyr::ungroup()
+
+SevenDayMean %>%
+  dplyr::arrange(Date)%>%
+  dplyr::filter(year == 2017)%>%
+  dplyr::select(Consumption, Date, year, test_07da)%>%
+  utils::head(7)
+
+par(mfrow = c(1, 1))
+
+plot(tsd$Date, tsd$Consumption, type = 'l', col = 'blue')
+points(SevenDayMean$test_07da, type = 'l', col = 'red', lwd = 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
